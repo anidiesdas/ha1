@@ -131,23 +131,51 @@ public class Calculator {
     }
 
     /**
-     * Berechnet das Ergebnis basierend auf gespeicherten Daten aus dem Array
-     * @param operations Array von Strings, das Zahlen & Operationen enthält
+     * Berechnet das Ergebnis einer (gereihten) Operation.
+     * Berücksichtigt dabei Punkt- vor Strichrechnung.
+     * @param operations Array von Strings, die eingegebenen Zahlen & Operatoren enthalten
      * @param length Länge des Arrays
      * @return Ergebnis als double
      */
     public double calculate(String[] operations, int length) {
+        // Punktrechnungen (Multiplikation & Division)
+        for (int i = 1; i < length; i += 2) {
+            String operation = operations[i];
+
+            if (operation.equals("x") || operation.equals("/")) {
+                double leftValue = Double.parseDouble(operations[i - 1]);
+                double rightValue = Double.parseDouble(operations[i + 1]);
+                double result;
+
+                if (operation.equals("x")) {
+                    result = leftValue * rightValue;
+                } else {
+                    result = leftValue / rightValue;
+                }
+
+                // Speichert Ergebnis und aktualisiert 1. Operandenposition
+                operations[i - 1] = Double.toString(result);
+
+                // Kopiere restlichen Elemente nach vorne
+                for (int a = i; a < length - 2; a++) {
+                    operations[a] = operations[a + 2];
+                }
+
+                length -= 2; // Array um 2 verkleinern
+                i -= 2; // Schleife um 2 kürzen
+            }
+        }
+
+        // Strichrechnungen (Addition & Subtraktion)
         double result = Double.parseDouble(operations[0]);
         for (int i = 1; i < length; i += 2) {
             String operation = operations[i];
-            double nextValue = Double.parseDouble(operations[i+1]);
+            double nextValue = Double.parseDouble(operations[i + 1]);
 
-            switch(operation) {
-                case "x" -> result *= nextValue;
-                case "/" -> result /= nextValue;
-                case "+" -> result += nextValue;
-                case "-" -> result -= nextValue;
-                default -> throw new IllegalArgumentException();
+            if (operation.equals("+")) {
+                result += nextValue;
+            } else if (operation.equals("-")) {
+                result -= nextValue;
             }
         }
         return result;
