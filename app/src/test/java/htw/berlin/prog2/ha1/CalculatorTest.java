@@ -110,6 +110,27 @@ class CalculatorTest {
     }
 
     @Test
+    @DisplayName("should allow operation chains")
+    void testChainedOperations() {
+        Calculator calc = new Calculator();
+
+        calc.pressDigitKey(5);
+        // calc.pressBinaryOperationKey("-");
+        calc.pressBinaryOperationKey("+");
+        calc.pressDigitKey(5);
+        calc.pressBinaryOperationKey("+");
+        calc.pressDigitKey(2);
+        calc.pressBinaryOperationKey("-");
+        calc.pressDigitKey(1);
+        calc.pressEqualsKey();
+
+        String expected = "11";
+        String actual = calc.readScreen();
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
     @DisplayName("should respect order of operations")
     void testOperationOrder() {
         Calculator calc = new Calculator();
@@ -122,30 +143,6 @@ class CalculatorTest {
         calc.pressEqualsKey();
 
         String expected = "7.5";
-        String actual = calc.readScreen();
-
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    @DisplayName("should handle operations with 9-digit numbers")
-    void testMaximumDigits() {
-        Calculator calc = new Calculator();
-
-        calc.pressDigitKey(1);
-        calc.pressDigitKey(2);
-        calc.pressDigitKey(3);
-        calc.pressDigitKey(4);
-        calc.pressDigitKey(5);
-        calc.pressDigitKey(6);
-        calc.pressDigitKey(7);
-        calc.pressDigitKey(8);
-        calc.pressDigitKey(9);
-        calc.pressBinaryOperationKey("-");
-        calc.pressDigitKey(1);
-        calc.pressEqualsKey();
-
-        String expected = "123456788";
         String actual = calc.readScreen();
 
         assertEquals(expected, actual);

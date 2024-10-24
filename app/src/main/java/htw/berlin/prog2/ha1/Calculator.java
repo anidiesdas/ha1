@@ -9,10 +9,8 @@ package htw.berlin.prog2.ha1;
 public class Calculator {
 
     private String screen = "0";
-
-    private double latestValue;
-
-    private String latestOperation = "";
+    private String[] operations = new String[20];
+    private int currentIndex = 0;
 
     /**
      * @return den aktuellen Bildschirminhalt als String
@@ -31,7 +29,7 @@ public class Calculator {
     public void pressDigitKey(int digit) {
         if(digit > 9 || digit < 0) throw new IllegalArgumentException();
 
-        if(screen.equals("0") || latestValue == Double.parseDouble(screen)) screen = "";
+        if(screen.equals("0")) screen = "";
 
         screen = screen + digit;
     }
@@ -46,8 +44,8 @@ public class Calculator {
      */
     public void pressClearKey() {
         screen = "0";
-        latestOperation = "";
-        latestValue = 0.0;
+        operations = new String[20];
+        currentIndex = 0;
     }
 
     /**
@@ -60,8 +58,12 @@ public class Calculator {
      * @param operation "+" für Addition, "-" für Substraktion, "x" für Multiplikation, "/" für Division
      */
     public void pressBinaryOperationKey(String operation)  {
-        latestValue = Double.parseDouble(screen);
-        latestOperation = operation;
+        operations[currentIndex] = screen; // speichert angezeigte Zahl
+        currentIndex++;
+        operations[currentIndex] = operation; // speichert gewählte Operation
+        currentIndex++;
+        screen = "";
+
     }
 
     /**
@@ -72,8 +74,6 @@ public class Calculator {
      * @param operation "√" für Quadratwurzel, "%" für Prozent, "1/x" für Inversion
      */
     public void pressUnaryOperationKey(String operation) {
-        latestValue = Double.parseDouble(screen);
-        latestOperation = operation;
         var result = switch(operation) {
             case "√" -> Math.sqrt(Double.parseDouble(screen));
             case "%" -> Double.parseDouble(screen) / 100;
@@ -118,16 +118,38 @@ public class Calculator {
      * und das Ergebnis direkt angezeigt.
      */
     public void pressEqualsKey() {
-        var result = switch(latestOperation) {
-            case "+" -> latestValue + Double.parseDouble(screen);
-            case "-" -> latestValue - Double.parseDouble(screen);
-            case "x" -> latestValue * Double.parseDouble(screen);
-            case "/" -> latestValue / Double.parseDouble(screen);
-            default -> throw new IllegalArgumentException();
-        };
+        operations[currentIndex] = screen; // speichert letzte angezeigte Zahl im Array
+        double result = calculate(operations, currentIndex +1);
         screen = Double.toString(result);
+
         if(screen.equals("Infinity")) screen = "Error";
         if(screen.endsWith(".0")) screen = screen.substring(0,screen.length()-2);
         if(screen.contains(".") && screen.length() > 11) screen = screen.substring(0, 10);
+
+        operations = new String[20];
+        currentIndex = 0;
+    }
+
+    /**
+     * Berechnet das Ergebnis basierend auf gespeicherten Daten aus dem Array
+     * @param operations Array von Strings, das Zahlen & Operationen enthält
+     * @param length Länge des Arrays
+     * @return Ergebnis als double
+     */
+    public double calculate(String[] operations, int length) {
+        double result = Double.parseDouble(operations[0]);
+        for (int i = 1; i < length; i += 2) {
+            String operation = operations[i];
+            double nextValue = Double.parseDouble(operations[i+1]);
+
+            switch(operation) {
+                case "x" -> result *= nextValue;
+                case "/" -> result /= nextValue;
+                case "+" -> result += nextValue;
+                case "-" -> result -= nextValue;
+                default -> throw new IllegalArgumentException();
+            }
+        }
+        return result;
     }
 }
